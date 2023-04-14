@@ -1,13 +1,13 @@
 // --- plan
 
 // get the username password
-// get the url,baseurl 
+// get the url,baseurl  done
 //     if url not found then show already connect window
-// get request to the fgauth page 
-// extract the params from fgauth page
-// send the post request
-// get the logged in page 
-// get the loggout url
+// get request to the fgauth page  done 
+// extract the params from fgauth page done
+// send the post request done
+// get the logged in page  done
+// get the loggout url done
 // store all in shared preferences 
 
 // logout button 
@@ -35,3 +35,11 @@
 //   check done each 5 seconds or more time if status == true || logged
 
 //   getcreds function can check the sharedprefs and show dialog if required
+
+
+// location.href = new keepalive window
+
+
+// option to change username and password
+
+// add speedo meter within app

@@ -6,6 +6,29 @@ import 'dart:io';
 import 'dart:convert';
 import 'package:html/dom.dart';
 import 'package:html/parser.dart';
+import 'helpers.dart';
+
+class NITAuthenticator {
+  NITAuthenticator(this.passsword, this.username, this.preferences);
+  final String username;
+  final String passsword;
+  final Map<String, String> preferences;
+
+  // pref.lastTime
+  // pref.timeout
+  // pref.logouturl
+  // pref.keepaliveurl
+  // pref.baseurl
+
+  void login() {
+    return;
+  }
+
+  void logout() {
+    // if(logged in and logout url is not present, send get request via keepalive)
+    return;
+  }
+}
 
 void main(List<String> arguments) {
   // print('Hello world: ${nitcauthcli.calculate()}!');
@@ -28,101 +51,47 @@ void main(List<String> arguments) {
   getSecurekey();
 }
 
-Future<String> getRequestHandler(
-    HttpClient client, String addr, bool redirect) async {
-  client.connectionTimeout = Duration(seconds: 2);
-  var url = Uri.parse(addr);
-  var request = await client.getUrl(url);
-  // request.headers.add(HttpHeaders.upgradeHeader, '1');
-  // request.headers.add(HttpHeaders.acceptEncodingHeader, 'gzip');
-  request.followRedirects = false;
-  var response = await request.close();
-  var responseBody = await response.transform(utf8.decoder).join();
-
-  // var response = await request.close();
-  // var bytes = await response.transform(gzip.decoder).toList();
-  // var flattenedBytes = await response.expand((byteList) => byteList).toList();
-  // var flattenedBytes =
-  //     await response.expand<List<int>>((byteList) => byteList).toList();
-  // var flattenedBytes = await response.expand(convert).toList();
-  // var html = utf8.decode(flattenedBytes);
-
-  return responseBody.toString();
-}
-
-Future<String> postRequestHandler(
-    HttpClient client, String addr, bool redirect, dynamic requestbody) async {
-  client.connectionTimeout = Duration(seconds: 2);
-  var url = Uri.parse(addr);
-  var request = await client.postUrl(url);
-  request.headers
-      .set(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
-  request.write(requestbody);
-
-  final response = await request.close();
-  // request.headers.add(HttpHeaders.upgradeHeader, '1');
-  // request.headers.add(HttpHeaders.acceptEncodingHeader, 'gzip');
-  request.followRedirects = false;
-  var responseBody = await response.transform(utf8.decoder).join();
-
-  // var response = await request.close();
-  // var bytes = await response.transform(gzip.decoder).toList();
-  // var flattenedBytes = await response.expand((byteList) => byteList).toList();
-  // var flattenedBytes =
-  //     await response.expand<List<int>>((byteList) => byteList).toList();
-  // var flattenedBytes = await response.expand(convert).toList();
-  // var html = utf8.decode(flattenedBytes);
-
-  return responseBody.toString();
-}
-
-String? getBaseUrl(String body) {
-  String? baseurl;
-  RegExp regex = RegExp(r'http:\/\/[\d.]+:\d+/');
-
-  var regexmatch = regex.firstMatch(body);
-
-  if (regexmatch != null) {
-    print('object');
-    baseurl = regexmatch.group(0);
-    print(baseurl);
-    return baseurl;
-  }
-
-  return 'null';
-
-  /// standard to have null as output
-}
-
 void getSecurekey() async {
   var httpClient = HttpClient();
 
   String firstaddr = "http://apple.com";
 
   var firstpage = await getRequestHandler(httpClient, firstaddr, false);
+  var fgurl = getFgUrl(firstpage);
+  var baseurl = getBaseUrl(firstpage);
+  if (fgurl == 'null') {
+    // print("you are already connected or using a different network than NITC");
+    // return;
+  }
   // print(html);
   // var stringtest =
   //     'sdgasdghs  a "http://192.168.65.1:1000/fgtauth?45b7ca37e558ba9c" sdg';
+  baseurl = 'https://starlighter4097.github.io/testing-props/';
+  var loginpage = await getRequestHandler(
+      httpClient, baseurl.toString(), false); // change to fgurl when in use
+  // print(loginpage);
 
-  var webAddressPattern =
-      RegExp(r"""http:\/\/[\d]+.[\d]+.[\d]+.[\d]+:[\d]+\/[^'\\"]*""");
-  // var webAddressPattern = RegExp(r"""http:\/\/.+[^'\\"]*""");
+  var payload = getParams(loginpage);
+  print(payload);
 
-  var webAddressMatch = webAddressPattern.firstMatch(firstpage);
-  // var secureKeyMatch = secureKeyPattern.firstMatch(html);
+  // var loggedpage = postRequestHandler(httpClient, baseurl, false, payload);
+  // above is working fine
+  var loggedpageurl =
+      'https://starlighter4097.github.io/testing-props/logout.html';
 
-  if (webAddressMatch != null) {
-    // print('object');
-    var baseurl = webAddressMatch.group(0);
-    print(baseurl);
+  var loggedpage = await getRequestHandler(httpClient, loggedpageurl, false);
 
-    var loginpage =
-        await getRequestHandler(httpClient, baseurl.toString(), false);
-    print(loginpage);
-    // print(fgrequest);
-  } else {
-    print("you are already connected or using a different network than NITC");
-  }
+  var logouturl = getLogoutUrl(loggedpage);
+  var keepaliveurl = getKeepaliveUrl(loggedpage);
+  var timeout = getTimeout(loggedpage);
+
+  print(logouturl);
+  print(keepaliveurl);
+  print(timeout);
+
+  // if keepalive url to be used to get logout url and logout
+
+  // print(fgrequest);
 
   //http:\/\/[\d]+.[\d]+.[\d]+.[\d]+:[\d]+\/[^'\\"]*
 
@@ -136,92 +105,47 @@ void getSecurekey() async {
   // List<dynamic> urls = links.map((link) => link.attributes['href']).toList();
   // print(urls);
   // var fgauthregex = RegExp();
+  httpClient.close();
 }
 
-Map<String, String> getParams(String responseBody) {
-  String username = 'abhishek_b220631ee';
-  String password = 'B220631EE';
+// var loggedpageurl = getloggedpageurl('<a href="http://192.168.65.1:1000/logout?0b00020a0f1bafab"> logout </a>');
+// print(loggedpageurl);
 
-  // print(baseurl.toString());
+// class nitcauthcli
 
-  // print(response.body);
+// write a function to extract the base url from the html page
 
-  var parsed = parse(responseBody);
+// --- plan
 
-  List<dynamic> inputs = parsed.getElementsByTagName('input');
-  String magic = 'none';
-  String tredir = 'none';
+// get the username password
+// get the url,baseurl
+//     if url not found then show already connect window
+// get request to the fgauth page
+// extract the params from fgauth page
+// send the post request
+// get the logged in page
+// get the loggout url
+// store all in shared preferences
 
-  for (var input in inputs) {
-    var name = input.attributes['name'];
+// logout button
+//   set a sample keepalive window url in the object modal
+//   send get request and extract the loggout Url
+//   send logout request
 
-    if (name == '4Tredir') {
-      tredir = input.attributes['value'];
-    } else if (name == 'magic') {
-      magic = input.attributes['value'];
-    }
+// class nitcauthcli
 
-    // if (name != null) {
-    //   print(name);
-    // }
-    // print(input);
-  }
+//   class values of shared prefs on initialisation
 
-  print(magic);
-  print(tredir);
-  // baseurl = baseurl! + '/';
+//   functions:
 
-  // client exception connection reset by peer
+//     getcreds,editcreds
+//     login,logout,timer
+//     getbaseurl,getfgurl,getparams,getloggedpageurl,gettimeout,
+//     getrequest,postrequest,
+//     setprefs,getprefs,showresults,
 
-  // client = http.Client();
+//   get the timeout time and set the date and timeout,and predicted timeout into shared pref
+//   when time << time.now() send logout and login request  simultaneously
+//   check done each 5 seconds or more time if status == true || logged
 
-  var payload = {
-    "username": username,
-    "passsword": password,
-    "4Tredir": tredir,
-    "magic": magic
-  };
-
-  return payload;
-}
-
-
-
-
-//plan
-
-get the username password
-get the url,baseurl 
-    if url not found then show already connect window
-get request to the fgauth page 
-extract the params from fgauth page
-send the post request
-get the logged in page 
-get the loggout url
-store all in shared preferences 
-
-logout button 
-  set a sample keepalive window url in the object modal 
-  send get request and extract the loggout Url
-  send logout request
-
-
-class nitcauthcli
-
-  class values of shared prefs on initialisation
-
- 
-  functions: 
-
-    getcreds,editcreds
-    login,logout,timer
-    getbaseurl,getfgurl,getparams,getlogouturl,gettimeout,
-    getrequest,postrequest,
-    setprefs,getprefs,showresults,
-  
-
-  get the timeout time and set the date and timeout,and predicted timeout into shared pref 
-  when time << time.now() send logout and login request  simultaneously
-  check done each 5 seconds or more time if status == true || logged
-
-  getcreds function can check the sharedprefs and show dialog if required
+//   getcreds function can check the sharedprefs and show dialog if required
