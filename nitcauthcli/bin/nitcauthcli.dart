@@ -1,3 +1,6 @@
+import 'dart:html';
+import 'dart:web_gl';
+
 import 'package:nitcauthcli/nitcauthcli.dart' as nitcauthcli;
 import 'dart:io';
 import 'dart:convert';
@@ -47,6 +50,50 @@ Future<String> getRequestHandler(
   return responseBody.toString();
 }
 
+Future<String> postRequestHandler(
+    HttpClient client, String addr, bool redirect, dynamic requestbody) async {
+  client.connectionTimeout = Duration(seconds: 2);
+  var url = Uri.parse(addr);
+  var request = await client.postUrl(url);
+  request.headers
+      .set(HttpHeaders.contentTypeHeader, "application/json; charset=UTF-8");
+  request.write(requestbody);
+
+  final response = await request.close();
+  // request.headers.add(HttpHeaders.upgradeHeader, '1');
+  // request.headers.add(HttpHeaders.acceptEncodingHeader, 'gzip');
+  request.followRedirects = false;
+  var responseBody = await response.transform(utf8.decoder).join();
+
+  // var response = await request.close();
+  // var bytes = await response.transform(gzip.decoder).toList();
+  // var flattenedBytes = await response.expand((byteList) => byteList).toList();
+  // var flattenedBytes =
+  //     await response.expand<List<int>>((byteList) => byteList).toList();
+  // var flattenedBytes = await response.expand(convert).toList();
+  // var html = utf8.decode(flattenedBytes);
+
+  return responseBody.toString();
+}
+
+String? getBaseUrl(String body) {
+  String? baseurl;
+  RegExp regex = RegExp(r'http:\/\/[\d.]+:\d+/');
+
+  var regexmatch = regex.firstMatch(body);
+
+  if (regexmatch != null) {
+    print('object');
+    baseurl = regexmatch.group(0);
+    print(baseurl);
+    return baseurl;
+  }
+
+  return 'null';
+
+  /// standard to have null as output
+}
+
 void getSecurekey() async {
   var httpClient = HttpClient();
 
@@ -91,24 +138,15 @@ void getSecurekey() async {
   // var fgauthregex = RegExp();
 }
 
-void getParams(String link) async {
+Map<String, String> getParams(String responseBody) {
   String username = 'abhishek_b220631ee';
   String password = 'B220631EE';
-  String? baseurl;
-  RegExp regex = RegExp(r'http:\/\/[\d.]+:\d+');
 
-  var regexmatch = regex.firstMatch(link);
-
-  if (regexmatch != null) {
-    print('object');
-    baseurl = regexmatch.group(0);
-    print(baseurl);
-  }
   // print(baseurl.toString());
 
   // print(response.body);
 
-  var parsed = parse(response.body);
+  var parsed = parse(responseBody);
 
   List<dynamic> inputs = parsed.getElementsByTagName('input');
   String magic = 'none';
@@ -131,16 +169,59 @@ void getParams(String link) async {
 
   print(magic);
   print(tredir);
-  baseurl = baseurl! + '/';
+  // baseurl = baseurl! + '/';
 
   // client exception connection reset by peer
 
-  client = http.Client();
+  // client = http.Client();
 
-  var loginresponse = await client.post(Uri.parse(baseurl), body: {
+  var payload = {
     "username": username,
     "passsword": password,
     "4Tredir": tredir,
     "magic": magic
-  });
+  };
+
+  return payload;
 }
+
+
+
+
+//plan
+
+get the username password
+get the url,baseurl 
+    if url not found then show already connect window
+get request to the fgauth page 
+extract the params from fgauth page
+send the post request
+get the logged in page 
+get the loggout url
+store all in shared preferences 
+
+logout button 
+  set a sample keepalive window url in the object modal 
+  send get request and extract the loggout Url
+  send logout request
+
+
+class nitcauthcli
+
+  class values of shared prefs on initialisation
+
+ 
+  functions: 
+
+    getcreds,editcreds
+    login,logout,timer
+    getbaseurl,getfgurl,getparams,getlogouturl,gettimeout,
+    getrequest,postrequest,
+    setprefs,getprefs,showresults,
+  
+
+  get the timeout time and set the date and timeout,and predicted timeout into shared pref 
+  when time << time.now() send logout and login request  simultaneously
+  check done each 5 seconds or more time if status == true || logged
+
+  getcreds function can check the sharedprefs and show dialog if required
