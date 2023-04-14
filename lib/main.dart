@@ -2,28 +2,58 @@
 
 // import 'dart:html';
 
+import 'dart:convert';
+import 'dart:io';
+
 import 'package:flutter/material.dart';
+// import 'package:shell/shell.dart';
 
 import './helpers/helpers.dart';
 import 'package:html/parser.dart';
 import 'package:html/dom.dart' as dom;
 
 void httptest() async {
+  var httpClient = HttpClient();
+  httpClient.connectionTimeout = Duration(seconds: 3);
+  var urls = Uri.parse('http://www.gstatic.com/generate_204');
+  var request = await httpClient.getUrl(urls);
+  request.headers.add(HttpHeaders.acceptEncodingHeader, 'gzip');
+  request.followRedirects = false;
+  var response = await request.close();
+  // var bytes = await response.transform(gzip.decoder).toList();
+  var bytes = await response.expand((b) => b).toList();
+  // var html = utf8.decode(bytes);
+  // var flattenedBytes = bytes.expand((byteList) => byteList).toList();
+  var output = utf8.decode(bytes);
+  // var output = utf8.decode(flattenedBytes);
+
+  if (!output.startsWith('<html>')) {
+    print('Something doesn\'t seem right. Check if you are already logged in');
+    // exit(1);
+  }
+
+  getsecurekey();
+  // var shell = new Shell();
+
+  //     arguments: ["-m 3 -s 'http://www.gstatic.com/generate_204'--compressed"]);
+  //  "curl -m 3 -s 'http://www.gstatic.com/generate_204'--compressed'"
+  // print(pwd);
+
   // var client = http.Client();
 
   // var response = await client.get(Uri.parse('http://google.com'));
 
   // print(response.headers);
 
-  final url = await getLoginUrl();
-  // print('here');
-  // print(url);
-  if (url == 'http://www.google.co.in/') {
-    print("Logged in already or using a different network");
-  } else {
-    print("url is $url");
-    getParams(url!);
-  }
+  // final url = await getLoginUrl();
+  // // print('here');
+  // // print(url);
+  // if (url == 'http://www.google.co.in/') {
+  //   print("Logged in already or using a different network");
+  // } else {
+  //   print("url is $url");
+  //   getParams(url!);
+  // }
 
 //  var url = Uri.parse('http://example.com');
   // var response = await http.get(url);

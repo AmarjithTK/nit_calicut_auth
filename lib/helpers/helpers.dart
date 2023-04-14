@@ -1,3 +1,5 @@
+// import 'dart:html';
+// import 'dart:html';
 import 'dart:io';
 import 'package:http/http.dart' as http;
 import 'package:html/dom.dart';
@@ -5,6 +7,8 @@ import 'package:html/parser.dart';
 import 'package:html/dom.dart';
 import 'package:html/dom_parsing.dart';
 
+import 'dart:convert';
+import 'dart:io';
 // socket exception should be handled carefully
 ///
 ///
@@ -64,7 +68,6 @@ void getParams(String link) async {
 
   var response = await client.get(Uri.parse(link));
   // print(response.body);
-  client.close();
 
   var parsed = parse(response.body);
 
@@ -91,12 +94,60 @@ void getParams(String link) async {
   print(tredir);
   baseurl = baseurl! + '/';
 
-  var loginresponse = await http.post(Uri.parse(baseurl), body: {
+  client.close();
+
+  // client exception connection reset by peer
+
+  client = http.Client();
+
+  var loginresponse = await client.post(Uri.parse(baseurl), body: {
     "username": username,
     "passsword": password,
     "4Tredir": tredir,
     "magic": magic
   });
+  client.close();
 
   print(loginresponse.body);
+}
+
+void getsecurekey() async {
+  var httpClient = HttpClient();
+  httpClient.connectionTimeout = Duration(seconds: 3);
+  var url = Uri.parse('http://www.gstatic.com/generate_204');
+  var request = await httpClient.getUrl(url);
+  // request.headers.add(HttpHeaders.upgradeHeader, '1');
+  request.headers.add(HttpHeaders.acceptEncodingHeader, 'gzip');
+  request.followRedirects = false;
+  var response = await request.close();
+  // var bytes = await response.transform(gzip.decoder).toList();
+  var flattenedBytes = await response.expand((byteList) => byteList).toList();
+  var html = utf8.decode(flattenedBytes);
+
+  print(html);
+
+  var webAddressPattern = RegExp(r'http:\/\/[\d.]+:\d+');
+  var secureKeyPattern = RegExp(r'\?(.*?)">');
+
+  var webAddressMatch = webAddressPattern.firstMatch(html);
+  var secureKeyMatch = secureKeyPattern.firstMatch(html);
+
+  if (webAddressMatch != null) {
+    print('object');
+    var baseurl = webAddressMatch.group(0);
+    print(baseurl);
+  }
+  print(webAddressMatch);
+  if (webAddressMatch == null || secureKeyMatch == null) {
+    print('Failed to extract web address and/or secure key');
+    return;
+  }
+
+  var webAddress = webAddressMatch.group(0)!;
+  var secureKey = secureKeyMatch.group(1);
+
+  var authUrl = Uri.parse('$webAddress/fgtauth?$secureKey');
+  var authRequest = await httpClient.getUrl(authUrl);
+  var authResponse = await authRequest.close();
+  await authResponse.drain();
 }
