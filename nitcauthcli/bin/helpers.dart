@@ -159,6 +159,25 @@ String getLogoutUrl(String body) {
   /// standard to have null as output
 }
 
+String? getRegexResponse(String body, String regex, int matchgroup) {
+  // String rawString = 'r"""${regex}"""';
+  // print(rawString);
+  var webAddressPattern = RegExp(regex);
+  // var webAddressPattern = RegExp(r"""http:\/\/.+[^'\\"]*""");
+
+  var webAddressMatch = webAddressPattern.firstMatch(body);
+  // var secureKeyMatch = secureKeyPattern.firstMatch(html);
+  var baseurl;
+  if (webAddressMatch != null) {
+    // print(baseurl);
+    baseurl = webAddressMatch.group(matchgroup);
+    return baseurl;
+
+    // print(baseurl!);
+  }
+  return 'null';
+}
+
 String getKeepaliveUrl(String body) {
   var webAddressPattern =
       RegExp(r"""http:\/\/[\d.]+:\d+\/keepalive\?[a-zA-Z\d]+""");

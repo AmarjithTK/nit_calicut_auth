@@ -48,17 +48,29 @@ void main(List<String> arguments) {
   //   print(baseurl);
   // }
 
-  getSecurekey();
+  getLoginCreds();
 }
 
-void getSecurekey() async {
+void getLoginCreds() async {
+  //
+  //
   var httpClient = HttpClient();
-
   String firstaddr = "http://apple.com";
+  var fgauthregex = r"""http:\/\/[\d.]+:\d+\/fgtauth\?[a-zA-Z\d]+""";
+  var baseurlregex = r"http:\/\/[\d.]+:\d+/";
+  var logoutregex = r"""http:\/\/[\d.]+:\d+\/logout\?[a-zA-Z\d]+""";
+  var keepaliveregex = r"""http:\/\/[\d.]+:\d+\/keepalive\?[a-zA-Z\d]+""";
+  var timeoutregex = r"countDownTime=(\d+)";
 
   var firstpage = await getRequestHandler(httpClient, firstaddr, false);
-  var fgurl = getFgUrl(firstpage);
-  var baseurl = getBaseUrl(firstpage);
+
+  firstpage =
+      'what the hell is coding life very weakening http://192.168.65.1:1000/fgtauth?45b7ca37e558ba9c this far is difficult';
+  var fgurl = getRegexResponse(firstpage, fgauthregex, 0);
+  print(fgurl);
+  var baseurl = getRegexResponse(firstpage, baseurlregex, 0);
+
+  // var baseurl = getBaseUrl(firstpage);
   if (fgurl == 'null') {
     // print("you are already connected or using a different network than NITC");
     // return;
@@ -66,13 +78,13 @@ void getSecurekey() async {
   // print(html);
   // var stringtest =
   //     'sdgasdghs  a "http://192.168.65.1:1000/fgtauth?45b7ca37e558ba9c" sdg';
-  baseurl = 'https://starlighter4097.github.io/testing-props/';
+  var fglink = 'https://starlighter4097.github.io/testing-props/';
+
   var loginpage = await getRequestHandler(
-      httpClient, baseurl.toString(), false); // change to fgurl when in use
+      httpClient, fglink, false); // change to fgurl when in use
   // print(loginpage);
 
   var payload = getParams(loginpage);
-  print(payload);
 
   // var loggedpage = postRequestHandler(httpClient, baseurl, false, payload);
   // above is working fine
@@ -80,10 +92,20 @@ void getSecurekey() async {
       'https://starlighter4097.github.io/testing-props/logout.html';
 
   var loggedpage = await getRequestHandler(httpClient, loggedpageurl, false);
+  // print(loggedpage);
 
-  var logouturl = getLogoutUrl(loggedpage);
-  var keepaliveurl = getKeepaliveUrl(loggedpage);
-  var timeout = getTimeout(loggedpage);
+  // var logouturl = getLogoutUrl(loggedpage);
+
+  var logouturl = getRegexResponse(loggedpage, logoutregex, 0);
+  var keepaliveurl = getRegexResponse(loggedpage, keepaliveregex, 0);
+
+  // var keepaliveurl = getKeepaliveUrl(loggedpage);
+  // var timeout = getTimeout(loggedpage);
+  var timeout = getRegexResponse(loggedpage, timeoutregex, 1);
+
+  print(fgurl);
+  print(baseurl);
+  print(payload);
 
   print(logouturl);
   print(keepaliveurl);
