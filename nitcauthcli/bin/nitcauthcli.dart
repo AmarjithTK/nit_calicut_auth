@@ -28,6 +28,10 @@ class NITAuthenticator {
     // if(logged in and logout url is not present, send get request via keepalive)
     return;
   }
+
+  void editUserCreds() {}
+
+  void timer() {}
 }
 
 void main(List<String> arguments) {
@@ -48,7 +52,18 @@ void main(List<String> arguments) {
   //   print(baseurl);
   // }
 
-  getLoginCreds();
+  // getLoginCreds();
+  // printSeconds();
+
+  DateTime dt1 = DateTime.parse("2023-04-13 11:47:00");
+  String timeout = 650000.toString();
+  int timeRemaining = isTimeoutOrNot(timeout, dt1);
+
+  if (timeRemaining == 0) {
+    print("Time remaining : 0, timeout");
+  } else {
+    print("Time remaining : $timeRemaining seconds");
+  }
 }
 
 void getLoginCreds() async {

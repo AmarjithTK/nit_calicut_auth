@@ -1,13 +1,13 @@
 // --- plan
 
-// get the username password
-// get the url,baseurl  done
+// get the username password +
+// get the url,baseurl  +
 //     if url not found then show already connect window
-// get request to the fgauth page  done 
-// extract the params from fgauth page done
-// send the post request done
-// get the logged in page  done
-// get the loggout url done
+// get request to the fgauth page  done +
+// extract the params from fgauth page done+
+// send the post request done+
+// get the logged in page  done+
+// get the loggout url done+
 // store all in shared preferences 
 
 // logout button 
@@ -25,8 +25,8 @@
 
 //     getcreds,editcreds
 //     login,logout,timer
-//     getbaseurl,getfgurl,getparams,getlogouturl,gettimeout,
-//     getrequest,postrequest,
+//     getbaseurl,getfgurl,getparams,getlogouturl,gettimeout, + 
+//     getrequest,postrequest, +
 //     setprefs,getprefs,showresults,
   
 

@@ -1,9 +1,28 @@
 //  r"countDownTime=(\d+)"
 
 import 'dart:convert';
+import 'dart:ffi';
 import 'dart:io';
 
 import 'package:html/parser.dart';
+
+int isTimeoutOrNot(String timeout, DateTime lastlogin) {
+  // Get current time in nanoseconds
+  // int microSecondsNow = DateTime(Date).millisecondsSinceEpoch;
+
+  // DateTime dt1 = DateTime.parse("2023-04-13 11:47:00");
+  DateTime now = DateTime.now();
+
+  var diff = now.difference(lastlogin);
+  // print(diff.inDays);
+  if (diff.inSeconds > int.parse(timeout)) {
+    return 0;
+  }
+  return diff.inSeconds;
+  //   var diffString =
+  //       "${diff.inMinutes} minutes ${diff.inSeconds} seconds till timeout";
+  // print(diffString);
+}
 
 Future<String> getRequestHandler(
     HttpClient client, String addr, bool redirect) async {
@@ -55,44 +74,6 @@ Future<String> postRequestHandler(
 
 // write a function to send post request to baseurl with payload from the getparams function
 
-String? getBaseUrl(String body) {
-  String? baseurl;
-  RegExp regex = RegExp(r'http:\/\/[\d.]+:\d+/');
-
-  var regexmatch = regex.firstMatch(body);
-
-  if (regexmatch != null) {
-    print('object');
-    baseurl = regexmatch.group(0);
-    print(baseurl);
-    return baseurl;
-  }
-
-  return 'null';
-
-  /// standard to have null as output
-}
-
-String getFgUrl(String body) {
-  var webAddressPattern =
-      RegExp(r"""http:\/\/[\d.]+:\d+\/fgauth\?[a-zA-Z\d]+""");
-  // var webAddressPattern = RegExp(r"""http:\/\/.+[^'\\"]*""");
-
-  var webAddressMatch = webAddressPattern.firstMatch(body);
-  // var secureKeyMatch = secureKeyPattern.firstMatch(html);
-
-  if (webAddressMatch != null) {
-    // print('object');
-    var fgurl = webAddressMatch.group(0);
-    print(fgurl);
-
-    return fgurl!;
-  } else {
-    print("you are already connected or using a different network than NITC");
-    return "null";
-  }
-}
-
 Map<String, String> getParams(String responseBody) {
   String username = 'abhishek_b220631ee';
   String password = 'B220631EE';
@@ -115,20 +96,7 @@ Map<String, String> getParams(String responseBody) {
     } else if (name == 'magic') {
       magic = input.attributes['value'];
     }
-
-    // if (name != null) {
-    //   print(name);
-    // }
-    // print(input);
   }
-
-  // print(magic);
-  // print(tredir);
-  // baseurl = baseurl! + '/';
-
-  // client exception connection reset by peer
-
-  // client = http.Client();
 
   var payload = {
     "username": username,
@@ -138,25 +106,6 @@ Map<String, String> getParams(String responseBody) {
   };
 
   return payload;
-}
-
-//  http://192.168.65.1:1000/logout?0b00020a0f1bafab url to be extracted is similar to this match whole string with regex till quotes
-String getLogoutUrl(String body) {
-  var webAddressPattern =
-      RegExp(r"""http:\/\/[\d.]+:\d+\/logout\?[a-zA-Z\d]+""");
-  // var webAddressPattern = RegExp(r"""http:\/\/.+[^'\\"]*""");
-
-  var webAddressMatch = webAddressPattern.firstMatch(body);
-  // var secureKeyMatch = secureKeyPattern.firstMatch(html);
-  var baseurl;
-  if (webAddressMatch != null) {
-    // print('object');
-    baseurl = webAddressMatch.group(0);
-    // print(baseurl!);
-  }
-  return baseurl;
-
-  /// standard to have null as output
 }
 
 String? getRegexResponse(String body, String regex, int matchgroup) {
@@ -176,39 +125,4 @@ String? getRegexResponse(String body, String regex, int matchgroup) {
     // print(baseurl!);
   }
   return 'null';
-}
-
-String getKeepaliveUrl(String body) {
-  var webAddressPattern =
-      RegExp(r"""http:\/\/[\d.]+:\d+\/keepalive\?[a-zA-Z\d]+""");
-  // var webAddressPattern = RegExp(r"""http:\/\/.+[^'\\"]*""");
-
-  var webAddressMatch = webAddressPattern.firstMatch(body);
-  // var secureKeyMatch = secureKeyPattern.firstMatch(html);
-  var baseurl;
-  if (webAddressMatch != null) {
-    // print('object');
-    baseurl = webAddressMatch.group(0);
-    // print(baseurl!);
-  }
-  return baseurl;
-
-  /// standard to have null as output
-}
-
-String getTimeout(String body) {
-  var webAddressPattern = RegExp(r"countDownTime=(\d+)");
-  // var webAddressPattern = RegExp(r"""http:\/\/.+[^'\\"]*""");
-
-  var webAddressMatch = webAddressPattern.firstMatch(body);
-  // var secureKeyMatch = secureKeyPattern.firstMatch(html);
-  var baseurl;
-  if (webAddressMatch != null) {
-    // print('object');
-    baseurl = webAddressMatch.group(1);
-    // print(baseurl!);
-  }
-  return baseurl;
-
-  /// standard to have null as output
 }
