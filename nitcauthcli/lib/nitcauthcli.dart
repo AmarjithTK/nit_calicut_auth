@@ -1,7 +1,7 @@
-int calculate() {
-  return 6 * 7;
-}
+// int calculate() {
+//   return 6 * 7;
+// }
 
-void main(List<String> args) {
-  print('hello');
-}
+// void main(List<String> args) {
+//   print('hello');
+// }

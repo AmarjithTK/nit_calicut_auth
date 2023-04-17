@@ -1,5 +1,5 @@
-import 'dart:html';
-import 'dart:web_gl';
+// import 'dart:html';
+// import 'dart:web_gl';
 
 import 'package:nitcauthcli/nitcauthcli.dart' as nitcauthcli;
 import 'dart:io';
@@ -52,18 +52,18 @@ void main(List<String> arguments) {
   //   print(baseurl);
   // }
 
-  // getLoginCreds();
+  getLoginCreds();
   // printSeconds();
 
-  DateTime dt1 = DateTime.parse("2023-04-13 11:47:00");
-  String timeout = 650000.toString();
-  int timeRemaining = isTimeoutOrNot(timeout, dt1);
+  // DateTime dt1 = DateTime.parse("2023-04-13 11:47:00");
+  // String timeout = 650000.toString();
+  // int timeRemaining = isTimeoutOrNot(timeout, dt1);
 
-  if (timeRemaining == 0) {
-    print("Time remaining : 0, timeout");
-  } else {
-    print("Time remaining : $timeRemaining seconds");
-  }
+  // if (timeRemaining == 0) {
+  //   print("Time remaining : 0, timeout");
+  // } else {
+  //   print("Time remaining : $timeRemaining seconds");
+  // }
 }
 
 void getLoginCreds() async {
@@ -78,35 +78,53 @@ void getLoginCreds() async {
   var timeoutregex = r"countDownTime=(\d+)";
 
   var firstpage = await getRequestHandler(httpClient, firstaddr, false);
-
-  firstpage =
-      'what the hell is coding life very weakening http://192.168.65.1:1000/fgtauth?45b7ca37e558ba9c this far is difficult';
+// print(firstpage);
   var fgurl = getRegexResponse(firstpage, fgauthregex, 0);
   print(fgurl);
   var baseurl = getRegexResponse(firstpage, baseurlregex, 0);
 
   // var baseurl = getBaseUrl(firstpage);
   if (fgurl == 'null') {
-    // print("you are already connected or using a different network than NITC");
-    // return;
+    print("you are already connected or using a different network than NITC");
+    return;
   }
   // print(html);
   // var stringtest =
   //     'sdgasdghs  a "http://192.168.65.1:1000/fgtauth?45b7ca37e558ba9c" sdg';
-  var fglink = 'https://starlighter4097.github.io/testing-props/';
+  // var fglink = 'https://starlighter4097.github.io/testing-props/';
 
   var loginpage = await getRequestHandler(
-      httpClient, fglink, false); // change to fgurl when in use
+      httpClient, fgurl!, false); // change to fgurl when in use
   // print(loginpage);
 
   var payload = getParams(loginpage);
 
   // var loggedpage = postRequestHandler(httpClient, baseurl, false, payload);
   // above is working fine
-  var loggedpageurl =
-      'https://starlighter4097.github.io/testing-props/logout.html';
+  // var loggedpageurl =
+      // 'https://starlighter4097.github.io/testing-props/logout.html';
+    print(baseurl);
 
-  var loggedpage = await getRequestHandler(httpClient, loggedpageurl, false);
+
+Map<String, String> headers = {
+  "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.7",
+  "Accept-Encoding": "gzip, deflate",
+  "Accept-Language": "en-GB,en-US;q=0.9,en;q=0.8",
+  "Cache-Control": "max-age=0",
+  "Connection": "keep-alive",
+  // "Content-Length": "121",
+  "Content-Type": "application/x-www-form-urlencoded",
+  "Host": "192.168.65.1:1000",
+  "Origin": "http://192.168.65.1:1000",
+  "Referer": fgurl,
+  "Upgrade-Insecure-Requests": "1",
+  "User-Agent": "Mozilla/5.0 (X11; Linux x86_64) AppleWebKit/537.36 (KHTML, like Gecko) Chrome/112.0.0.0 Safari/537.36"
+};
+
+
+
+
+  var loggedpage = await postRequestHandler(httpClient, baseurl!,true,payload,headers);
   // print(loggedpage);
 
   // var logouturl = getLogoutUrl(loggedpage);
